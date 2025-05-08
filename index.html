@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Astounding design stolen from http://motherfuckingwebsite.com.  -->
+    <!-- Yes, I made my shitty website look like this.  Don't tell my mom. -->
+    
+    <title>Argus : extended and extensible types for JSON</title>
+  </head>
+
+  <body>
+    <header>
+      <h1>Argus</h1>
+      <aside>Extended and extensible types for JSON</aside>
+    </header>
+    
+    <h2>JSON is great, but ...</h2>
+    
+    <p>JSON supports:</p>
+    
+    <ul>
+      <li>nil</li>
+      <li>boolean</li>
+      <li>number</li>
+      <li>string</li>
+      <li>array</li>
+      <li>object</li>
+    </ul>
+
+    <p>There are other types of data that one regularly encounters writing software, and there are
+      custom types that one may want to send between backend and frontend or remote systems, e.g.,
+      dates, UUIDs, sets.</p>
+
+    <p>Handling custom types is ad hoc.  Data is encoded and the expected types are either implicit
+      in the code or defined in an out-of-band schema.  You can't inspect data in a general way.
+      The data isn't necessarily human readable.  You can't process data unless the code and/or
+      schema matches the version of the data you're reading.  The encoding varies from application
+      to application.</p>
+
+    <h3>JSON, but better ...</h3>
+
+    <p>The Argus proposal is simple: encode a custom type as a <strong><em>tagged
+      value</em></strong>.  A <em>tagged value</em> is an object with a single field/value, the
+      field is a tag starting with "<code>#</code>" and the value is an encoded value made up of
+      JSON types or other tagged values.  For example a date would be:</p>
+
+    <code>{"#date" : "1912-06-23"}</code>
+
+    <p>So, a person may be represented like this:</p>
+
+    <code>{"firstName" : "Alan", "lastName" : "Turing", "dateOfBirth" : {"#date" : "1912-06-23"}}</code>
+
+    <p>A person as a tagged value might be:</p>
+
+    <code>{"#com.example.person" : {"firstName" : "Alan", "lastName" : "Turing", "dateOfBirth" : {"#date" : "1912-06-23"}}}</code>
+
+    <h3>Sometimes an object is just an object</h3>
+
+    <p>If an object has only a single field/value, but the field does not start with "#", then it is
+      not a tagged value.  For example, this is not a date:</p>
+
+    <code>{"date" : "1912-06-23"}</code>
+
+    <p>This is also not a tagged value because it has more than one field/value pair:</p>
+
+    <code>{"#date" : "1912-06-23", "type" : "date"}</code>
+
+    <p>If an object has a single field/value, but you do not recognize the tag, then just leave it
+      as a tagged value.  Maybe someone else will understand the tag.  They'll thank you later.</p>
+
+    <code>{"#com.example.widget" : [15,73,22,-12]}</code>
+
+    <h3>Is this a library or specification or ...?</h3>
+
+    <p>This is not a library.  It is a concept.  Call it a lightweight specification.</p>
+
+    <p>You do not need to implement a JSON parser yourself.  Find a fast one and implement
+      <code>enargus</code>/<code>deargus</code> functions as a translation layer on top of it.</p>
+
+    <p>It could be a library.  If it was a library it should allow registering reader/writers for
+      new types, and process arbitrary tagged values (even if it doesn't understand them).  If you
+      make a library, share it!</p>
+
+    <h3>That's pretty much it!</h3>
+    
+    <p>That's pretty much it!</p>
+
+    <h2>Some modest proposals</h2>
+
+    <ol>
+      <li>Tags should be namespaced with one or more segments separated by a dot ("<code>.</code>"),
+        e.g., "<code>#com.example.mytag</code>".</li>
+      <li>Single segment tags are reserved to define common types (see below).</li>
+      <li>If you want to write your own JSON parser, then allow for reading comments and trailing
+        commas in objects and arrays, but never produce them.  100% of developers will thank you for
+        it.</li>
+    </ol>
+
+    <table>
+      <caption>Common types and tags</caption>
+      <thead>
+        <tr>
+          <th>type</th>
+          <th>tag</th>
+          <th>example</th>
+          <th>description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>date</td>
+          <td><code>#date</code></td>
+          <td><code>{"#date" : "2025-05-08"}</code></td>
+          <td>A local date without a time or timezone in ISO-8601 format.</td>
+        </tr>
+        <tr>
+          <td>instant</td>
+          <td><code>#instant</code></td>
+          <td><code>{"#instant" : "2025-05-08T12:27:58.851-00:00"}</code></td>
+          <td>A date with a time and timezone in ISO-8601 format.</td>
+        </tr>
+        <tr>
+          <td>set</td>
+          <td><code>#set</code></td>
+          <td><code>{"#set" : [1, 2, 3]}</code></td>
+          <td>A set of heterogeneous values encoded as an array.</td>
+        </tr>
+        <tr>
+          <td>uuid</td>
+          <td><code>#uuid</code></td>
+          <td><code>{"#uuid" : "bbaaf5f4-66e7-4056-8056-be29c6e292d8"}</code></td>
+          <td>A Universally Unique Identifier formatted as a string.</td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <h3>Doesn't library/specification/etc. X do this?</h3>
+
+    <p>The good ones use a similar or exactly the same tagging scheme and allow for
+      extensibility.</p>
+    
+    <p>The bad ones are complicated and/or not human readable.</p>
+  </body>
+</html>
