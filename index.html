@@ -108,7 +108,8 @@
         e.g., "<code>#com.example.mytag</code>".</li>
       <li>Single segment tags are reserved to define common types (see below).</li>
       <li>If you don't understand a tag, or if you cannot meaningfully decode it (e.g., an integer
-        value is too large for you to decode), then just leave the tagged value undecoded.</li>
+        value is too large for you to decode, or a UUID string format is invalid, or a decoder
+        function throws an exception), then just leave the tagged value undecoded.</li>
       <li>If you want to write your own JSON parser, then allow for reading comments and trailing
         commas in objects and arrays, but never produce them.  100% of developers will thank you for
         it.</li>
